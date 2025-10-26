@@ -11,7 +11,8 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print(f"✅ Logged in as {bot.user}")
-    check_timers.start()
+    if not check_timers.is_running():
+        check_timers.start()
 
 @bot.command()
 async def ping(ctx):
@@ -19,12 +20,15 @@ async def ping(ctx):
 
 @tasks.loop(seconds=30)
 async def check_timers():
-    print("Checking timers... (this runs every 30 seconds)")
+    print("⏱ Checking timers... (every 30 seconds)")
 
 @check_timers.before_loop
 async def before_check_timers():
     await bot.wait_until_ready()
 
+async def main():
+    async with bot:
+        await bot.start(os.getenv("DISCORD_TOKEN"))
+
 if __name__ == "__main__":
-    TOKEN = os.getenv("DISCORD_TOKEN")
-    asyncio.run(bot.start(TOKEN))
+    asyncio.run(main())
